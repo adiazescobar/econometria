@@ -1152,9 +1152,9 @@ include_graphics("Clase2_files/figure-html/pegado10.jpeg")
 
 ```{R, save pdfs, include = F, eval = F}
 # PDF with pauses
-xaringan::decktape("02-review.html", "02-review.pdf")
+xaringan::decktape("~/clases/Clase1/Clase2/Clase2.html", "02-review.pdf")
 # PDF without pauses
-pagedown::chrome_print("02-review.html", "02-review-no-pause.pdf")
+pagedown::chrome_print("~/clases/Clase1/Clase2/Clase2.html", "02-review-no-pause.pdf")
 ```
 
 
