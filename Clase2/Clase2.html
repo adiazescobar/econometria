@@ -4,7 +4,7 @@
     <title>Econometría</title>
     <meta charset="utf-8" />
     <meta name="author" content="Ana María Díaz" />
-    <meta name="date" content="2023-07-24" />
+    <meta name="date" content="2023-07-25" />
     <script src="Clase2_files/header-attrs/header-attrs.js"></script>
     <link href="Clase2_files/remark-css/default.css" rel="stylesheet" />
     <link href="Clase2_files/remark-css/metropolis.css" rel="stylesheet" />
@@ -25,7 +25,7 @@ class: center, middle, inverse, title-slide
 ### Ana María Díaz
 ]
 .date[
-### 24 July 2023
+### 25 July 2023
 ]
 
 ---
@@ -734,6 +734,90 @@ class: clear
 class: clear
 &lt;img src="Clase2_files/figure-html/pegado10.jpeg" width="60%" style="display: block; margin: auto;" /&gt;
 ---
+
+# S3: Colinealidad Imperfecta
+
+
+`\begin{equation}
+X\,\textrm{es una matriz }nxK\textrm{ con rango }K
+\end{equation}`
+
+
+.pull-left[Wooldridge (2003), este supuesto permite que las variables independientes estén correlacionadas, siempre y cuando no lo hagan de forma perfecta.
+]
+.pull-right[
+&lt;img src="Clase2_files/figure-html/wooldridge.jpeg" width="40%" style="display: block; margin: auto;" /&gt;
+]
+
+
+---
+class: clear
+---
+class: clear
+---
+class: clear
+---
+
+# S3: Perturbaciones Esféricas
+
+## Homocedasticidad
+`\(Var(\epsilon_{i}|X)=\sigma^{2}\textrm{ para }i=1,...,n\)`
+
+Homocedasticidad significa que la dispersión alrededor de la recta
+de regresión es igual para los diversos valores de `\(X\)`.
+
+## No Autocorrelación
+`\(Cov(\epsilon_{i},\epsilon_{j}|X)=0\textrm{ para }i\neq j\)`
+
+La no autocorrelación significa que los errores no se encuentran relacionados
+entre sí. La autocorrelación generalmente aparece en datos de series
+de tiempo aunque también puede presentarse en el caso de una muestra
+de corte transversal (e.g., correlación espacial).
+
+---
+
+# S3: Perturbaciones Esféricas
+`\begin{align*}
+Var(\epsilon|X) &amp;= E[\epsilon\epsilon'|X]-E[\epsilon|X]E[\epsilon'|X] \\
+&amp;= E[\epsilon\epsilon'|X]-\underbrace{E[\epsilon|X]E[\epsilon'|X]}_{0}\textrm{ por supuesto A2.} \\
+&amp;= E\left[\left[\begin{array}{c}
+\epsilon_{1}\\
+\epsilon_{2}\\
+\vdots\\
+\epsilon_{n}
+\end{array}\right]\left[\begin{array}{cccc}
+\epsilon_{1} &amp; \epsilon_{2} &amp; \cdots &amp; \epsilon_{n}\end{array}\right]|X\right]
+\end{align*}`
+
+---
+
+# S3: Perturbaciones Esféricas
+`\begin{align*}
+Var(\epsilon|X) &amp;=  \left[\begin{array}{cccc}
+E[\epsilon_{1}\epsilon_{1}|X] &amp; E[\epsilon_{1}\epsilon_{2}|X] &amp; \cdots &amp; E[\epsilon_{1}\epsilon_{n}|X]\\
+E[\epsilon_{2}\epsilon_{1}|X] &amp; E[\epsilon_{2}\epsilon_{2}|X] &amp; \cdots &amp; E[\epsilon_{2}\epsilon_{n}|X]\\
+\vdots &amp; \vdots &amp; \ddots &amp; \vdots\\
+E[\epsilon_{n}\epsilon_{1}|X] &amp; E[\epsilon_{n}\epsilon_{1}|X] &amp; \cdots &amp; E[\epsilon_{n}\epsilon_{n}|X]
+\end{array}\right] \\
+&amp;= \left[\begin{array}{cccc}
+Var[\epsilon_{1}|X] &amp; Cov[\epsilon_{1}\epsilon_{2}|X] &amp; \cdots &amp; Cov[\epsilon_{1}\epsilon_{n}|X]\\
+Cov[\epsilon_{2}\epsilon_{1}|X] &amp; Var[\epsilon_{2}|X] &amp; \cdots &amp; Cov[\epsilon_{2}\epsilon_{n}|X]\\
+\vdots &amp; \vdots &amp; \ddots &amp; \vdots\\
+Cov[\epsilon_{n}\epsilon_{1}|X] &amp; Cov[\epsilon_{n}\epsilon_{1}|X] &amp; \cdots &amp; Var[\epsilon_{n}|X]
+\end{array}\right] \\
+&amp;= \left[\begin{array}{cccc}
+\sigma^{2} &amp; 0 &amp; \cdots &amp; 0\\
+0 &amp; \sigma^{2} &amp; \cdots &amp; 0\\
+\vdots &amp; \vdots &amp; \ddots &amp; \vdots\\
+0 &amp; 0 &amp; \cdots &amp; \sigma^{2}
+\end{array}\right]\textrm{ por supuesto A4.}
+\end{align*}`
+---
+# S3: Perturbaciones Esféricas
+`\begin{equation}
+Var[\epsilon|X]=E[\epsilon\epsilon'|X]=\sigma^{2}I
+\end{equation}`
+
 
 
 
