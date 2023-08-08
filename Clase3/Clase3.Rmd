@@ -1,0 +1,368 @@
+---
+title: "Econometría"
+subtitle: "Supuestos básico (código de R de Edward Rubin)"
+author: "Ana María Díaz"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output:
+  xaringan::moon_reader:
+    css: ['default', 'metropolis', 'metropolis-fonts', 'my-css.css']
+    # self_contained: true
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+class: inverse, middle
+
+```{r Setup, include = F}
+options(htmltools.dir.version = FALSE)
+library(pacman)
+p_load(broom, latex2exp, ggplot2, ggthemes, viridis, dplyr, magrittr, knitr, parallel)
+# Define pink color
+red_pink <- "#e64173"
+# Notes directory
+# Knitr options
+opts_chunk$set(
+  comment = "#>",
+  fig.align = "center",
+  fig.height = 7,
+  fig.width = 10.5,
+  # dpi = 300,
+  warning = F,
+  message = F
+)
+# A blank theme for ggplot
+theme_empty <- theme_bw() + theme(
+  line = element_blank(),
+  rect = element_blank(),
+  strip.text = element_blank(),
+  axis.text = element_blank(),
+  plot.title = element_blank(),
+  axis.title = element_blank(),
+  plot.margin = structure(c(0, 0, -1, -1), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_simple <- theme_bw() + theme(
+  line = element_blank(),
+  panel.grid = element_blank(),
+  rect = element_blank(),
+  strip.text = element_blank(),
+  axis.text.x = element_text(size = 14),
+  axis.text.y = element_blank(),
+  axis.ticks = element_blank(),
+  plot.title = element_blank(),
+  axis.title = element_blank(),
+  # plot.margin = structure(c(0, 0, -1, -1), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+```
+
+# Bienvenidos
+
+---
+
+
+
+# MCO: Supuestos y propiedades 
+
+## Los supuestos del modelo clásico de regresión lineal están resumidos en la siguiente tabla:
+
+| Supuesto                     | Implicación                                       |
+|-----------------------------|----------------------------------------------------------|
+| A1. Lineal                  | $y=X\beta+\epsilon$                |
+| A2. Exogeneidad Estricta     | $\mathop{E}\left[\epsilon_{i} \mid X \right]=0$ |  
+| A3. Colinealidad Imperfecta  | $X$ es una matriz $nxK$ con rango $K$    | 
+| A4. Perturbaciones Esféricas | $\mathop{Var}\left[\epsilon_{i} \mid X \right]=\sigma^{2}$   | 
+|                             | $\mathop{Cov}\left[\epsilon_{i},\epsilon_{j}\mid X \right]=0$     |
+| A5. Regresores no estocásticos | $X$ es una matriz $nxK$ no estocástica |   
+| A6. Normalidad              | $\epsilon \mid X\sim N(0,\sigma^{2}I)$   |         
+| A.2, A.4-A.6                | $\epsilon \mid X\sim i.i.d\quad N(0,\sigma^{2}I)$ | 
+
+---
+# S1: Lineal en parámetros
+
+El valor esperado de la distribución de y está relacionada con el
+valor de $X_{i}$ de una manera lineal:
+
+$$E[Y|X_{i}=x]=f(X_{i})=X_{i}\beta$$
+Por lo tanto el proceso generador de datos es igual a 
+
+$$Y_{i}=X\beta+\epsilon$$
+---
+# S1: Lineal en parámetros
+
+---
+# S1: Lineal en parámetros
+
+
+---
+# S1: Lineal en parámetros
+
+---
+
+# S1: Lineal en parámetros
+## Modelos de Regresión
+
+- **Lineal**: $y_{i} = \beta_{1} + \beta_{2}x_{i} + \epsilon_{i}$
+
+- **Log-log**: $ln(y_{i}) = \beta_{1} + \beta_{2}ln(x_{i}) + \epsilon_{i}$
+
+- **Log-lineal**: $ln(y_{i}) = \beta_{1} + \beta_{2}x_{i} + \epsilon_{i}$
+
+- **Lineal-log**: $y_{i} = \beta_{1} + \beta_{2}ln(x_{i}) + \epsilon_{i}$
+
+- **Recíproco**: $y_{i} = \beta_{1} + \beta_{2}\frac{1}{x_{i}} + \epsilon_{i}$
+
+- **Cuadrático**: $y_{i} = \beta_{1} + \beta_{2}x_{i} + \beta_{3}x_{i}^{^{2}} + \epsilon_{i}$
+
+- **Interactuado**: $y_{i} = \beta_{1} + \beta_{2}x_{i1} + \beta_{3}x_{i2} + \beta_{4}(x_{i1}\times x_{i2}) + \epsilon_{i}$
+
+En general, un modelo de regresión es no lineal cuando ni es lineal en su formación original, ni se puede convertir en un modelo lineal mediante alguna transformación.
+
+---
+# S2: Exogeneidad Estricta 
+
+Para muchas de las aplicaciones de la economía el supuesto más importante es la **EXOGENEIDAD**
+
+
+$$
+\begin{align}
+  \mathop{E}\left[ \epsilon \mid X \right] = 0
+\end{align}
+$$
+Pero qué quiere decir?
+
+--
+
+Una forma de pensar en esta definición es:
+
+> Para *cualquier* valor de  $X$, el valor esperado de los residuos debe ser igual a cero
+
+- _E.g._, $\mathop{E}\left[ u \mid X=1 \right]=0$ *and* $\mathop{E}\left[ u \mid X=100 \right]=0$
+
+- _E.g._, $\mathop{E}\left[ u \mid X_2=\text{Mujer} \right]=0$ *and* $\mathop{E}\left[ u \mid X_2=\text{Hombre} \right]=0$
+
+- Note: $\mathop{E}\left[ u \mid X \right]=0$ es más restrictivo que  $\mathop{E}\left[ u \right]=0$
+---
+layout: false
+class: clear, middle
+
+Graficamente...
+---
+exclude: true
+
+```{R, conditional_expectation_setup, include = F, cache = T}
+
+# Setup ----------------------------------------------------------------------------------
+  # Options
+  options(stringsAsFactors = F)
+  # Packages
+  library(pacman)
+  p_load(ggridges)
+
+# Data work ------------------------------------------------------------------------------
+  # Set seed
+  set.seed(12345)
+  # Sample size
+  n <- 1e5
+  # Exogenous
+  e_good <- tibble(
+    x = runif(n = n, min = -4, max = 4),
+    e = rnorm(n)
+  ) %>% mutate(x = round(x))
+  # Endogenous
+  e_bad <- tibble(
+    x = runif(n = n, min = -4, max = 4),
+    e = rnorm(n) + 0.5 * x
+  ) %>% mutate(x = round(x))
+
+# Figures: Joint densities ---------------------------------------------------------------
+  # The joint plot: good
+  joint_good <- ggplot(data = e_good, aes(x = e)) +
+    geom_density() +
+    theme_pander()
+  # The joint plot: bad
+  joint_bad <- ggplot(data = e_bad, aes(x = e)) +
+    geom_density() +
+    theme_pander()
+
+# Figures: Conditional densities ---------------------------------------------------------
+  cond_good <- ggplot(data = e_good, aes(x = e, y = as.factor(x))) +
+    geom_density_ridges_gradient(
+      aes(fill = ..x..),
+      color = "white",
+      scale = 2.5,
+      size = 0.2
+    ) +
+    # geom_vline(xintercept = 0, alpha = 0.3) +
+    scale_fill_viridis(option = "magma") +
+    xlab("e") +
+    ylab("X") +
+    theme_pander(base_family = "Fira Sans Book", base_size = 18) +
+    theme(
+      legend.position = "none",
+      axis.title.y = element_text(angle = 0, vjust = 0.5, family = "MathJax_Math", size = 22),
+      axis.title.x = element_text(family = "MathJax_Math", size = 22)
+    )
+  cond_bad <- ggplot(data = e_bad, aes(x = e, y = as.factor(x))) +
+    geom_density_ridges_gradient(
+      aes(fill = ..x..),
+      color = "white",
+      scale = 2.5,
+      size = 0.2
+    ) +
+    # geom_vline(xintercept = 0, alpha = 0.3) +
+    scale_fill_viridis(option = "magma") +
+    xlab("e") +
+    ylab("X") +
+    theme_pander(base_family = "Fira Sans Book", base_size = 18) +
+    theme(
+      legend.position = "none",
+      axis.title.y = element_text(angle = 0, vjust = 0.5, family = "MathJax_Math", size = 22),
+      axis.title.x = element_text(family = "MathJax_Math", size = 22)
+    )
+```
+---
+class: clear
+
+Exogeneidad Estricta se cumple, $\mathop{E}\left[ \epsilon \mid X \right] = 0$
+
+```{R, ex_good_exog, echo = F, dev = "svg"}
+cond_good
+```
+---
+class: clear
+
+Exogeneidad Estricta se Incumple, _i.e._, $\mathop{E}\left[ \epsilon \mid X \right] \neq 0$
+
+```{R, ex_bad_exog, echo = F, dev = "svg"}
+cond_bad
+```
+
+
+---
+
+# S3: Colinealidad Imperfecta
+
+
+\begin{equation}
+X\,\textrm{es una matriz }nxK\textrm{ con rango }K
+\end{equation}
+
+
+.pull-left[Wooldridge (2003), este supuesto permite que las variables independientes estén correlacionadas, siempre y cuando no lo hagan de forma perfecta.
+]
+.pull-right[
+```{r,  out.width = "40%", echo = F}
+include_graphics("Clase3_files/figure-html/wooldridge.jpeg")
+```
+]
+
+
+---
+i. Si hay un vector $x_{k}$ cuyos valores son iguales a cero, o cuando no existe variación en alguno de los regresores.
+
+ii. Cuando dos variables independientes $x_{k}$ son iguales.
+
+iii. Si una variable es proporcional a otra.
+
+iv. Cuando una variable es una combinación lineal de otras.
+
+En estos casos específicos, el rango de la matriz $X$ será menor que $K$, lo que implica que las columnas de $X$ no son linealmente independientes.
+---
+class: clear
+---
+class: clear
+---
+
+# S4: Perturbaciones Esféricas
+
+## Homocedasticidad
+$Var(\epsilon_{i}|X)=\sigma^{2}\textrm{ para }i=1,...,n$
+
+Homocedasticidad significa que la dispersión alrededor de la recta
+de regresión es igual para los diversos valores de $X$.
+
+## No Autocorrelación
+$Cov(\epsilon_{i},\epsilon_{j}|X)=0\textrm{ para }i\neq j$
+
+La no autocorrelación significa que los errores no se encuentran relacionados
+entre sí. La autocorrelación generalmente aparece en datos de series
+de tiempo aunque también puede presentarse en el caso de una muestra
+de corte transversal (e.g., correlación espacial).
+
+---
+
+# S4: Perturbaciones Esféricas
+\begin{align*}
+Var(\epsilon|X) &= E[\epsilon\epsilon'|X]-E[\epsilon|X]E[\epsilon'|X] \\
+&= E[\epsilon\epsilon'|X]-\underbrace{E[\epsilon|X]E[\epsilon'|X]}_{0}\textrm{ por supuesto A2.} \\
+\end{align*}
+--
+\begin{align*}
+&= E\left[\left[\begin{array}{c}
+\epsilon_{1}\\
+\epsilon_{2}\\
+\vdots\\
+\epsilon_{n}
+\end{array}\right]\left[\begin{array}{cccc}
+\epsilon_{1} & \epsilon_{2} & \cdots & \epsilon_{n}\end{array}\right]|X\right]
+\end{align*}
+
+---
+
+# S4: Perturbaciones Esféricas
+\begin{align*}
+Var(\epsilon|X) &=  \left[\begin{array}{cccc}
+E[\epsilon_{1}\epsilon_{1}|X] & E[\epsilon_{1}\epsilon_{2}|X] & \cdots & E[\epsilon_{1}\epsilon_{n}|X]\\
+E[\epsilon_{2}\epsilon_{1}|X] & E[\epsilon_{2}\epsilon_{2}|X] & \cdots & E[\epsilon_{2}\epsilon_{n}|X]\\
+\vdots & \vdots & \ddots & \vdots\\
+E[\epsilon_{n}\epsilon_{1}|X] & E[\epsilon_{n}\epsilon_{1}|X] & \cdots & E[\epsilon_{n}\epsilon_{n}|X]
+\end{array}\right] \\
+&= \left[\begin{array}{cccc}
+Var[\epsilon_{1}|X] & Cov[\epsilon_{1}\epsilon_{2}|X] & \cdots & Cov[\epsilon_{1}\epsilon_{n}|X]\\
+Cov[\epsilon_{2}\epsilon_{1}|X] & Var[\epsilon_{2}|X] & \cdots & Cov[\epsilon_{2}\epsilon_{n}|X]\\
+\vdots & \vdots & \ddots & \vdots\\
+Cov[\epsilon_{n}\epsilon_{1}|X] & Cov[\epsilon_{n}\epsilon_{1}|X] & \cdots & Var[\epsilon_{n}|X]
+\end{array}\right] \\
+&= \left[\begin{array}{cccc}
+\sigma^{2} & 0 & \cdots & 0\\
+0 & \sigma^{2} & \cdots & 0\\
+\vdots & \vdots & \ddots & \vdots\\
+0 & 0 & \cdots & \sigma^{2}
+\end{array}\right]\textrm{ por supuesto A4.}
+\end{align*}
+---
+# S4: Perturbaciones Esféricas
+\begin{equation}
+Var[\epsilon|X]=E[\epsilon\epsilon'|X]=\sigma^{2}I
+\end{equation}
+---
+# S5. Regresores no estocásticos
+La implicación de este supuesto es que no hay necesidad de distinguir entre la distribución condicional del error, $f(\epsilon_{i}|x_{1},\cdots,x_{n})$, y la distribución no condicional, $f(\epsilon_{i})$, por lo tanto los supuestos A.2 y A.4 pueden escribirse como:
+
+- A.2. $E(\epsilon_{i}|X)=E(\epsilon_{i})=0$
+- A.4. $E[\epsilon\epsilon'|X]=E[\epsilon\epsilon']=\sigma^{2}I$
+
+
+---
+# S6. Normalidad
+
+\begin{equation}
+\epsilon|X\sim N(0,\sigma^{2}I)
+\end{equation}
+
+  Como dice Greene (2003): ``el supuesto de normalidad generalmente
+es considerado como innecesario y posiblemente inapropiado para ser
+incluido al modelo de regresión. Excepto en aquellos casos en los
+que se asume explícitamente alguna distribución alternativa''.
+
+---
+```{R, save pdfs, include = F, eval = F}
+# PDF with pauses
+# xaringan::decktape("~/clases/Clase1/Clase2/Clase2.html", "02-review.pdf")
+# PDF without pauses
+pagedown::chrome_print("~/clases/Clase1/Clase3/Clase3.html", "~/clases/Clase1/Clase3/Clase3.pdf")
+```
+
+

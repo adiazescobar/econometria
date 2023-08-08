@@ -1,0 +1,316 @@
+---
+title: "Econometría Avanzada"
+subtitle: "Regresión Múltiple"
+author: "Ana MAria Díaz (R de Edward Rubin)"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output:
+  xaringan::moon_reader:
+    css: ['default', 'metropolis', 'metropolis-fonts', 'my-css.css']
+    # self_contained: true
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+class: inverse, middle
+
+```{r Setup, include = F}
+options(htmltools.dir.version = FALSE)
+library(pacman)
+p_load(broom, latex2exp, ggplot2, ggthemes, ggforce, viridis, dplyr, magrittr, knitr, parallel)
+# Notes directory
+dir_slides <- "~/Dropbox/UO/Teaching/EC421W19/LectureNotes/02Review/"
+# Knitr options
+opts_chunk$set(
+  comment = "#>",
+  fig.align = "center",
+  fig.height = 7,
+  fig.width = 10.5,
+  warning = F,
+  message = F
+)
+# A blank theme for ggplot
+theme_empty <- theme_bw() + theme(
+  line = element_blank(),
+  rect = element_blank(),
+  strip.text = element_blank(),
+  axis.text = element_blank(),
+  plot.title = element_blank(),
+  axis.title = element_blank(),
+  plot.margin = structure(c(0, 0, -0.5, -1), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_simple <- theme_bw() + theme(
+  line = element_blank(),
+  panel.grid = element_blank(),
+  rect = element_blank(),
+  strip.text = element_blank(),
+  axis.text.x = element_text(size = 14),
+  axis.text.y = element_blank(),
+  axis.ticks = element_blank(),
+  plot.title = element_blank(),
+  axis.title = element_blank(),
+  # plot.margin = structure(c(0, 0, -1, -1), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_axes <- theme_empty + theme(
+  axis.title = element_text(size = 18),
+  plot.margin = structure(c(0, 0, 0.1, 0), unit = "lines", valid.unit = 3L, class = "unit"),
+)
+```
+
+```{R, colors, include = F}
+# Define pink color
+red_pink <- "#e64173"
+turquoise <- "#20B2AA"
+orange <- "#FFA500"
+red <- "#fb6107"
+blue <- "#2b59c3"
+green <- "#8bb174"
+grey_light <- "grey70"
+grey_mid <- "grey50"
+grey_dark <- "grey20"
+purple <- "#6A5ACD"
+```
+
+# Prologue
+
+---
+class: inverse, middle
+
+# Regresión Múltiple 
+
+---
+layout: true
+#  Regresión Múltiple 
+
+---
+
+## Regresión Múltiple 
+De la regresión simple
+$$ \color{#e64173}{y_i} = \beta_0 + \beta_1 \color{#6A5ACD}{x_i} + u_i $$
+
+a la regresión múltiple
+
+$$ \color{#e64173}{y\_i} = \beta\_0 + \beta\_1 \color{#6A5ACD}{x\_{1i}} + \beta\_2 \color{#6A5ACD}{x\_{2i}} + \cdots + \beta\_k \color{#6A5ACD}{x\_{ki}} + u\_i $$
+
+--
+
+**Por qué?**
+--
+ Explicar mejor la variación de $y$, mejorar las predicciones, evitar sesgo por variables omitidas, ...
+
+---
+
+```{R, gen data, cache = T, include = F}
+n <- 1e2
+set.seed(1234)
+gen_df <- tibble(
+  x1 = runif(n = n, min = -3, max = 3),
+  x2 = sample(x = c(F, T), size = n, replace = T),
+  u  = rnorm(n = n, mean = 0, sd = 1),
+  y  = -0.5 + x1 + x2 * 4 + u
+)
+mean_a <- filter(gen_df, x2 == F)$y %>% mean()
+mean_b <- filter(gen_df, x2 == T)$y %>% mean()
+gen_df %<>% mutate(y_dm = y - mean_a * (x2 == F) - mean_b * (x2 == T))
+```
+
+$y_i = \beta_0 + \beta_1 x_{1i} + \beta_2 x_{2i} + u_i \quad$ $x_1$ es una variable continua $\quad x_2$ es categórica
+
+```{R, mult reg plot 1, dev = "svg", echo = F, fig.height = 6.25}
+ggplot(data = gen_df, aes(y = y, x = x1, color = x2, shape = x2)) +
+geom_hline(yintercept = 0) +
+geom_vline(xintercept = 0) +
+annotate("text", x = -0.075, y = 7.75, label = TeX("$y$"), size = 8) +
+annotate("text", x = 2.95, y = 0.3, label = TeX("$x_1$"), size = 8) +
+geom_point(size = 3) +
+ylim(c(-4.5, 8)) +
+theme_empty +
+scale_color_manual(
+  expression(x[2]),
+  values = c("darkslategrey", red_pink),
+  labels = c("A", "B")
+) +
+scale_shape_manual(
+  expression(x[2]),
+  values = c(1, 19),
+  labels = c("A", "B")
+) +
+theme(
+  legend.position = "bottom",
+  text = element_text(size = 20)
+)
+```
+
+---
+count: false
+
+El intercepto de la variable categórica $x_2$ controla por la media de los grupos
+
+```{R, mult reg plot 2, dev = "svg", echo = F, fig.height = 6.25}
+ggplot(data = gen_df, aes(y = y, x = x1, color = x2, shape = x2)) +
+geom_hline(yintercept = mean_a, color = "darkslategrey", alpha = 0.5) +
+geom_hline(yintercept = mean_b, color = red_pink, alpha = 0.5) +
+geom_hline(yintercept = 0) +
+geom_vline(xintercept = 0) +
+annotate("text", x = -0.075, y = 7.75, label = TeX("$y$"), size = 8) +
+annotate("text", x = 2.95, y = 0.3, label = TeX("$x_1$"), size = 8) +
+geom_point(size = 3) +
+ylim(c(-4.5, 8)) +
+theme_empty +
+scale_color_manual(
+  expression(x[2]),
+  values = c("darkslategrey", red_pink),
+  labels = c("A", "B")
+) +
+scale_shape_manual(
+  expression(x[2]),
+  values = c(1, 19),
+  labels = c("A", "B")
+) +
+theme(
+  legend.position = "bottom",
+  text = element_text(size = 20)
+)
+```
+
+---
+count: false
+
+Eliminamos la media de cada uno de los grupos:
+
+```{R, mult reg plot 3, dev = "svg", echo = F, fig.height = 6.25}
+ggplot(data = gen_df %>% mutate(y = y - 4 * x2), aes(y = y_dm, x = x1)) +
+geom_hline(yintercept = 0) +
+geom_vline(xintercept = 0) +
+annotate("text", x = -0.075, y = 7.75, label = TeX("$y$"), size = 8) +
+annotate("text", x = 2.95, y = 0.3, label = TeX("$x_1$"), size = 8) +
+geom_point(size = 3, aes(color = x2, shape = x2)) +
+ylim(c(-4.5, 8)) +
+theme_empty +
+scale_color_manual(
+  expression(x[2]),
+  values = c("darkslategrey", red_pink),
+  labels = c("A", "B")
+) +
+scale_shape_manual(
+  expression(x[2]),
+  values = c(1, 19),
+  labels = c("A", "B")
+) +
+theme(
+  legend.position = "bottom",
+  text = element_text(size = 20)
+)
+```
+
+---
+count: false
+
+$\hat{\beta}_1$ estima la relacioón entre  $y$ y $x_1$ luego de controlar por $x_2$.
+
+```{R, mult reg plot 4, dev = "svg", echo = F, fig.height = 6.25}
+ggplot(data = gen_df %>% mutate(y = y - 4 * x2), aes(y = y_dm, x = x1)) +
+geom_smooth(method = lm, se = F, color = "orange") +
+geom_hline(yintercept = 0) +
+geom_vline(xintercept = 0) +
+annotate("text", x = -0.075, y = 7.75, label = TeX("$y$"), size = 8) +
+annotate("text", x = 2.95, y = 0.3, label = TeX("$x_1$"), size = 8) +
+geom_point(size = 3, aes(color = x2, shape = x2)) +
+ylim(c(-4.5, 8)) +
+theme_empty +
+scale_color_manual(
+  expression(x[2]),
+  values = c("darkslategrey", red_pink),
+  labels = c("A", "B")
+) +
+scale_shape_manual(
+  expression(x[2]),
+  values = c(1, 19),
+  labels = c("A", "B")
+) +
+theme(
+  legend.position = "bottom",
+  text = element_text(size = 20)
+)
+```
+
+---
+count: false
+
+Otra forma de pensarlo:
+
+```{R, mult reg plot 5, dev = "svg", echo = F, fig.height = 6.25}
+ggplot(data = gen_df, aes(y = y, x = x1, color = x2, shape = x2)) +
+geom_smooth(method = lm, se = F) +
+geom_hline(yintercept = 0) +
+geom_vline(xintercept = 0) +
+annotate("text", x = -0.075, y = 7.75, label = TeX("$y$"), size = 8) +
+annotate("text", x = 2.95, y = 0.3, label = TeX("$x_1$"), size = 8) +
+geom_point(size = 3) +
+ylim(c(-4.5, 8)) +
+theme_empty +
+scale_color_manual(
+  expression(x[2]),
+  values = c("darkslategrey", red_pink),
+  labels = c("A", "B")
+) +
+scale_shape_manual(
+  expression(x[2]),
+  values = c(1, 19),
+  labels = c("A", "B")
+) +
+theme(
+  legend.position = "bottom",
+  text = element_text(size = 20)
+)
+```
+
+---
+
+
+Para la regresión lineal simple $y_i = \beta_0 + \beta_1 x_i + u_i$
+
+$$
+\begin{aligned}
+  \hat{\beta}_1 &= \\[0.3em]
+  &= \dfrac{\sum_i \left( x_i - \overline{x} \right) \left( y_i - \overline{y} \right)}{\sum_i \left( x_i -\overline{x} \right)} \\[0.3em]
+  &= \dfrac{\sum_i \left( x_i - \overline{x} \right) \left( y_i - \overline{y} \right)/(n-1)}{\sum_i \left( x_i -\overline{x} \right) / (n-1)} \\[0.3em]
+  &= \dfrac{\mathop{\hat{\text{Cov}}}(x,\,y)}{\mathop{\hat{\text{Var}}} \left( x \right)}
+\end{aligned}
+$$
+
+---
+Estimador de la regresión lineal simple:
+
+$$ \hat{\beta}_1 = \dfrac{\mathop{\hat{\text{Cov}}}(x,\,y)}{\mathop{\hat{\text{Var}}} \left( x \right)} $$
+
+Al movernos al estimador de la regresión múltiple, el estimador cambia un poco:
+
+$$ \hat{\beta}_1 = \dfrac{\mathop{\hat{\text{Cov}}}(\color{#e64173}{\tilde{x}_1},\,y)}{\mathop{\hat{\text{Var}}} \left( \color{#e64173}{\tilde{x}_1} \right)} $$
+
+donde $\color{#e64173}{\tilde{x}_1}$ es la variable $x_1$ limpia  *residualized*, que mide la variación restante en $x$ luego de controlar por todas las variablez $x$.
+
+---
+
+
+$$ y_i = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_3 x_3 + u_i $$
+
+Nuestra variable $x_{1}$ *limpia*  (que llamamos $\color{#e64173}{\tilde{x}_1}$) proviene de hacer una regresión de $x_1$ contra el intercepto y las variables de control restantes, _i.e._,
+
+$$
+\begin{aligned}
+  \hat{x}_{1i} &= \hat{\gamma}_0 + \hat{\gamma}_2 \, x_{2i} + \hat{\gamma}_3 \, x_{3i} \\
+  \color{#e64173}{\tilde{x}_{1i}} &= x_{1i} - \hat{x}_{1i}
+\end{aligned}
+$$
+
+--
+
+Lo que nos permite entender mejor el estimador de MCO
+
+$$ \hat{\beta}_1 = \dfrac{\mathop{\hat{\text{Cov}}}(\color{#e64173}{\tilde{x}_1},\,y)}{\mathop{\hat{\text{Var}}} \left( \color{#e64173}{\tilde{x}_1} \right)} $$
+
+---
+

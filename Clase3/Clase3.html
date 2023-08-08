@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Econometría</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Ana María Díaz" />
+    <meta name="date" content="2023-07-27" />
+    <script src="Clase3_files/header-attrs/header-attrs.js"></script>
+    <link href="Clase3_files/remark-css/default.css" rel="stylesheet" />
+    <link href="Clase3_files/remark-css/metropolis.css" rel="stylesheet" />
+    <link href="Clase3_files/remark-css/metropolis-fonts.css" rel="stylesheet" />
+    <link rel="stylesheet" href="my-css.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Econometría
+]
+.subtitle[
+## Supuestos básico (código de R de Edward Rubin)
+]
+.author[
+### Ana María Díaz
+]
+.date[
+### 27 July 2023
+]
+
+---
+
+class: inverse, middle
+
+
+
+# Bienvenidos
+
+---
+
+
+
+# MCO: Supuestos y propiedades 
+
+## Los supuestos del modelo clásico de regresión lineal están resumidos en la siguiente tabla:
+
+| Supuesto                     | Implicación                                       |
+|-----------------------------|----------------------------------------------------------|
+| A1. Lineal                  | `\(y=X\beta+\epsilon\)`                |
+| A2. Exogeneidad Estricta     | `\(\mathop{E}\left[\epsilon_{i} \mid X \right]=0\)` |  
+| A3. Colinealidad Imperfecta  | `\(X\)` es una matriz `\(nxK\)` con rango `\(K\)`    | 
+| A4. Perturbaciones Esféricas | `\(\mathop{Var}\left[\epsilon_{i} \mid X \right]=\sigma^{2}\)`   | 
+|                             | `\(\mathop{Cov}\left[\epsilon_{i},\epsilon_{j}\mid X \right]=0\)`     |
+| A5. Regresores no estocásticos | `\(X\)` es una matriz `\(nxK\)` no estocástica |   
+| A6. Normalidad              | `\(\epsilon \mid X\sim N(0,\sigma^{2}I)\)`   |         
+| A.2, A.4-A.6                | `\(\epsilon \mid X\sim i.i.d\quad N(0,\sigma^{2}I)\)` | 
+
+---
+# S1: Lineal en parámetros
+
+El valor esperado de la distribución de y está relacionada con el
+valor de `\(X_{i}\)` de una manera lineal:
+
+`$$E[Y|X_{i}=x]=f(X_{i})=X_{i}\beta$$`
+Por lo tanto el proceso generador de datos es igual a 
+
+`$$Y_{i}=X\beta+\epsilon$$`
+---
+# S1: Lineal en parámetros
+
+---
+# S1: Lineal en parámetros
+
+
+---
+# S1: Lineal en parámetros
+
+---
+
+# S1: Lineal en parámetros
+## Modelos de Regresión
+
+- **Lineal**: `\(y_{i} = \beta_{1} + \beta_{2}x_{i} + \epsilon_{i}\)`
+
+- **Log-log**: `\(ln(y_{i}) = \beta_{1} + \beta_{2}ln(x_{i}) + \epsilon_{i}\)`
+
+- **Log-lineal**: `\(ln(y_{i}) = \beta_{1} + \beta_{2}x_{i} + \epsilon_{i}\)`
+
+- **Lineal-log**: `\(y_{i} = \beta_{1} + \beta_{2}ln(x_{i}) + \epsilon_{i}\)`
+
+- **Recíproco**: `\(y_{i} = \beta_{1} + \beta_{2}\frac{1}{x_{i}} + \epsilon_{i}\)`
+
+- **Cuadrático**: `\(y_{i} = \beta_{1} + \beta_{2}x_{i} + \beta_{3}x_{i}^{^{2}} + \epsilon_{i}\)`
+
+- **Interactuado**: `\(y_{i} = \beta_{1} + \beta_{2}x_{i1} + \beta_{3}x_{i2} + \beta_{4}(x_{i1}\times x_{i2}) + \epsilon_{i}\)`
+
+En general, un modelo de regresión es no lineal cuando ni es lineal en su formación original, ni se puede convertir en un modelo lineal mediante alguna transformación.
+
+---
+# S2: Exogeneidad Estricta 
+
+Para muchas de las aplicaciones de la economía el supuesto más importante es la **EXOGENEIDAD**
+
+
+$$
+`\begin{align}
+  \mathop{E}\left[ \epsilon \mid X \right] = 0
+\end{align}`
+$$
+Pero qué quiere decir?
+
+--
+
+Una forma de pensar en esta definición es:
+
+&gt; Para *cualquier* valor de  `\(X\)`, el valor esperado de los residuos debe ser igual a cero
+
+- _E.g._, `\(\mathop{E}\left[ u \mid X=1 \right]=0\)` *and* `\(\mathop{E}\left[ u \mid X=100 \right]=0\)`
+
+- _E.g._, `\(\mathop{E}\left[ u \mid X_2=\text{Mujer} \right]=0\)` *and* `\(\mathop{E}\left[ u \mid X_2=\text{Hombre} \right]=0\)`
+
+- Note: `\(\mathop{E}\left[ u \mid X \right]=0\)` es más restrictivo que  `\(\mathop{E}\left[ u \right]=0\)`
+---
+layout: false
+class: clear, middle
+
+Graficamente...
+---
+exclude: true
+
+
+---
+class: clear
+
+Exogeneidad Estricta se cumple, `\(\mathop{E}\left[ \epsilon \mid X \right] = 0\)`
+
+&lt;img src="Clase3_files/figure-html/ex_good_exog-1.svg" style="display: block; margin: auto;" /&gt;
+---
+class: clear
+
+Exogeneidad Estricta se Incumple, _i.e._, `\(\mathop{E}\left[ \epsilon \mid X \right] \neq 0\)`
+
+&lt;img src="Clase3_files/figure-html/ex_bad_exog-1.svg" style="display: block; margin: auto;" /&gt;
+
+
+---
+
+# S3: Colinealidad Imperfecta
+
+
+`\begin{equation}
+X\,\textrm{es una matriz }nxK\textrm{ con rango }K
+\end{equation}`
+
+
+.pull-left[Wooldridge (2003), este supuesto permite que las variables independientes estén correlacionadas, siempre y cuando no lo hagan de forma perfecta.
+]
+.pull-right[
+&lt;img src="Clase3_files/figure-html/wooldridge.jpeg" width="40%" style="display: block; margin: auto;" /&gt;
+]
+
+
+---
+i. Si hay un vector `\(x_{k}\)` cuyos valores son iguales a cero, o cuando no existe variación en alguno de los regresores.
+
+ii. Cuando dos variables independientes `\(x_{k}\)` son iguales.
+
+iii. Si una variable es proporcional a otra.
+
+iv. Cuando una variable es una combinación lineal de otras.
+
+En estos casos específicos, el rango de la matriz `\(X\)` será menor que `\(K\)`, lo que implica que las columnas de `\(X\)` no son linealmente independientes.
+---
+class: clear
+---
+class: clear
+---
+
+# S4: Perturbaciones Esféricas
+
+## Homocedasticidad
+`\(Var(\epsilon_{i}|X)=\sigma^{2}\textrm{ para }i=1,...,n\)`
+
+Homocedasticidad significa que la dispersión alrededor de la recta
+de regresión es igual para los diversos valores de `\(X\)`.
+
+## No Autocorrelación
+`\(Cov(\epsilon_{i},\epsilon_{j}|X)=0\textrm{ para }i\neq j\)`
+
+La no autocorrelación significa que los errores no se encuentran relacionados
+entre sí. La autocorrelación generalmente aparece en datos de series
+de tiempo aunque también puede presentarse en el caso de una muestra
+de corte transversal (e.g., correlación espacial).
+
+---
+
+# S4: Perturbaciones Esféricas
+`\begin{align*}
+Var(\epsilon|X) &amp;= E[\epsilon\epsilon'|X]-E[\epsilon|X]E[\epsilon'|X] \\
+&amp;= E[\epsilon\epsilon'|X]-\underbrace{E[\epsilon|X]E[\epsilon'|X]}_{0}\textrm{ por supuesto A2.} \\
+\end{align*}`
+--
+`\begin{align*}
+&amp;= E\left[\left[\begin{array}{c}
+\epsilon_{1}\\
+\epsilon_{2}\\
+\vdots\\
+\epsilon_{n}
+\end{array}\right]\left[\begin{array}{cccc}
+\epsilon_{1} &amp; \epsilon_{2} &amp; \cdots &amp; \epsilon_{n}\end{array}\right]|X\right]
+\end{align*}`
+
+---
+
+# S4: Perturbaciones Esféricas
+`\begin{align*}
+Var(\epsilon|X) &amp;=  \left[\begin{array}{cccc}
+E[\epsilon_{1}\epsilon_{1}|X] &amp; E[\epsilon_{1}\epsilon_{2}|X] &amp; \cdots &amp; E[\epsilon_{1}\epsilon_{n}|X]\\
+E[\epsilon_{2}\epsilon_{1}|X] &amp; E[\epsilon_{2}\epsilon_{2}|X] &amp; \cdots &amp; E[\epsilon_{2}\epsilon_{n}|X]\\
+\vdots &amp; \vdots &amp; \ddots &amp; \vdots\\
+E[\epsilon_{n}\epsilon_{1}|X] &amp; E[\epsilon_{n}\epsilon_{1}|X] &amp; \cdots &amp; E[\epsilon_{n}\epsilon_{n}|X]
+\end{array}\right] \\
+&amp;= \left[\begin{array}{cccc}
+Var[\epsilon_{1}|X] &amp; Cov[\epsilon_{1}\epsilon_{2}|X] &amp; \cdots &amp; Cov[\epsilon_{1}\epsilon_{n}|X]\\
+Cov[\epsilon_{2}\epsilon_{1}|X] &amp; Var[\epsilon_{2}|X] &amp; \cdots &amp; Cov[\epsilon_{2}\epsilon_{n}|X]\\
+\vdots &amp; \vdots &amp; \ddots &amp; \vdots\\
+Cov[\epsilon_{n}\epsilon_{1}|X] &amp; Cov[\epsilon_{n}\epsilon_{1}|X] &amp; \cdots &amp; Var[\epsilon_{n}|X]
+\end{array}\right] \\
+&amp;= \left[\begin{array}{cccc}
+\sigma^{2} &amp; 0 &amp; \cdots &amp; 0\\
+0 &amp; \sigma^{2} &amp; \cdots &amp; 0\\
+\vdots &amp; \vdots &amp; \ddots &amp; \vdots\\
+0 &amp; 0 &amp; \cdots &amp; \sigma^{2}
+\end{array}\right]\textrm{ por supuesto A4.}
+\end{align*}`
+---
+# S4: Perturbaciones Esféricas
+`\begin{equation}
+Var[\epsilon|X]=E[\epsilon\epsilon'|X]=\sigma^{2}I
+\end{equation}`
+---
+# S5. Regresores no estocásticos
+La implicación de este supuesto es que no hay necesidad de distinguir entre la distribución condicional del error, `\(f(\epsilon_{i}|x_{1},\cdots,x_{n})\)`, y la distribución no condicional, `\(f(\epsilon_{i})\)`, por lo tanto los supuestos A.2 y A.4 pueden escribirse como:
+
+- A.2. `\(E(\epsilon_{i}|X)=E(\epsilon_{i})=0\)`
+- A.4. `\(E[\epsilon\epsilon'|X]=E[\epsilon\epsilon']=\sigma^{2}I\)`
+
+
+---
+# S6. Normalidad
+
+`\begin{equation}
+\epsilon|X\sim N(0,\sigma^{2}I)
+\end{equation}`
+
+  Como dice Greene (2003): ``el supuesto de normalidad generalmente
+es considerado como innecesario y posiblemente inapropiado para ser
+incluido al modelo de regresión. Excepto en aquellos casos en los
+que se asume explícitamente alguna distribución alternativa''.
+
+---
+
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
